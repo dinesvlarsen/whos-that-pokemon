@@ -1,0 +1,14 @@
+/* @font-face {
+	font-family: '...';
+	src: url('/fonts/...');
+	font-weight: normal;
+	font-style: normal;
+} */
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+@font-face {
+	font-family: 'pokemon-font';
+	src: url('../fonts/pokemon/pokemon-solid.ttf');
+	font-weight: normal;
+	font-style: normal;
+}

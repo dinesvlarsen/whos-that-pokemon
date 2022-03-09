@@ -37,15 +37,27 @@ export default {
 			correctButtonPressed: false,
 			altText: 'Image of a pokemon',
 			randomIdsUsed: [], //Array used to keep track of what pokemons has been fetched
+			allPokemon: []
 		};
 	},
 
 	async created() {
+		if(this.allPokemon.lenght > 0){
+			this.fetchPokemon();
+		}
+		
 		//Executes runApp method which starts the app.
 		this.runApp();
 	},
 
 	methods: {
+		async fetchPokemon() {
+			const url = 'https://pokeapi.co/api/v2/pokemon';
+			const response = await fetch(url);
+			const { results } = await response.json();
+			this.allPokemon = results;
+		},
+
 		//Method used to start the app.
 		runApp() {
 			this.resetAppData();
@@ -202,10 +214,10 @@ export default {
 <style>
 .pokemon-font {
 	color: #ffcb05;
-	-webkit-text-stroke-width: 0.08em;
+	-webkit-text-stroke-width: 0.06em;
 	-webkit-text-stroke-color: #385aaa;
 	letter-spacing: 4px;
-	font-size: 23px;
+	font-size: 20px;
 	text-align: center;
 	font-family: 'pokemon-font';
 	margin-bottom: 1rem;
@@ -220,7 +232,6 @@ export default {
 	border-radius: 50%;
 	border: 4px solid #ffcb05;
 	width: 200px;
-
 	margin: 30px auto;
 	height: auto;
 }

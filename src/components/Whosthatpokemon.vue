@@ -8,6 +8,15 @@
 		</div>
 
 		<h1 class="pokemon-font">{{ pokemonOutput }}</h1>
+
+		<button
+			@click.once="onClickCheck(index)"
+			class="guess-pokemon__buttons"
+			v-for="(pokemon, index) in this.gamePokemons"
+			:key="pokemon.index"
+		>
+			<div>{{ pokemon.name }}</div>
+		</button>
 	</div>
 </template>
 
@@ -101,8 +110,10 @@ export default {
 			if (this.randomIndexesUsed.includes(randomIndex)) {
 				this.setGamePokemons();
 			} else {
+				const pokemon = this.allPokemons[randomIndex];
+				pokemon.name = this.capitalizeString(pokemon.name);
 				// this.allPokemon[randomIndex].pokemonIndex = randomIndex + 1;
-				this.gamePokemons.push(this.allPokemons[randomIndex]);
+				this.gamePokemons.push(pokemon);
 
 				//Pushes the id used to the randomIndexesUsed array, so we can keep track of all the ids used.
 				this.randomIndexesUsed.push(randomIndex);

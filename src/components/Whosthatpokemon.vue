@@ -20,13 +20,14 @@ export default {
 					url: '',
 					altText: 'Picture of a pokemon',
 				},
-				index: null,
+				pokemonIndex: null,
+				correctAnswerIndex: null,
 				name: '',
 			},
 			pokemonOutput: "who's that Pokemon?",
 			gamePokemons: [],
 			correctButtonPressed: false,
-			randomIdsUsed: [], //Array used to keep track of what pokemons has been fetched
+			randomIndexesUsed: [], //Array used to keep track of what pokemons has been fetched
 			allPokemons: [],
 		};
 	},
@@ -47,48 +48,47 @@ export default {
 			const response = await fetch(url);
 			const { results } = await response.json();
 			this.allPokemons = results;
+			this.mutateAllPokemons();
 		},
 
 		//Method used to start the app.
 		runApp() {
-			this.insertRandomPokemons();
-			this.getCorrectPokemon();
+			this.getFourRandomPokemons();
+			this.setCorrectPokemonData();
+			console.log(this.gamePokemons);
 		},
 
 		//Gets the pokemon used as the correct answer, and sets the image and name of that pokemon.
-		getCorrectPokemon() {
-			const correctPokemonIndex = this.randomButtonNumber();
-			const correctPokemon = this.gamePokemons[correctPokemonIndex];
+		setCorrectPokemonData() {
+			const correctPokemonIndex = this.randomButtonIndex();
 
-			this.getCorrectPokemonImage(correctPokemon.url);
-			this.setCorrectPokemonData(correctPokemon.name, correctPokemonIndex);
+			this.correctPokemon.correctAnswerIndex = correctPokemonIndex;
+			this.correctPokemon.name = this.gamePokemons[correctPokemonIndex].name;
 		},
 
-		async getCorrectPokemonImage(correctPokemonUrl) {
-			const url = correctPokemonUrl;
-			const response = await fetch(url);
-			const pokemonData = await response.json();
-
-			const pokemonImage = pokemonData.sprites.front_default;
-			this.setPokemonImage(pokemonImage);
+		async getCorrectPokemonImage(imageIndex) {
+			const imageURL = `../assets/poke-sprites-kanto/${imageIndex}.png`;
+			this.correctPokemon.image.url = imageURL;
 		},
 
-		setCorrectPokemonData(correctPokemonName, correctPokemonIndex) {
-			this.correctPokemon.name = correctPokemonName;
-			this.correctPokemon.index = correctPokemonIndex;
+		mutateAllPokemons() {
+			this.allPokemons.forEach((pokemon, index) => {
+				pokemon.index = index;
+			});
 		},
 
 		//Gets a random pokemon from the pokeApi and pushes it to the gamePokemons array.
-		getRandomPokemonNames() {
+		setRandomPokemons() {
 			const randomIndex = this.randomIndex();
 
-			if (this.randomIdsUsed.includes(randomIndex)) {
-				this.getRandomPokemonName();
+			if (this.randomIndexesUsed.includes(randomIndex)) {
+				this.setRandomPokemons();
 			} else {
+				// this.allPokemon[randomIndex].pokemonIndex = randomIndex + 1;
 				this.gamePokemons.push(this.allPokemons[randomIndex]);
 
-				//Pushes the id used to the randomIdsUsed array, so we can keep track of all the ids used.
-				this.randomIdsUsed.push(randomIndex);
+				//Pushes the id used to the randomIndexesUsed array, so we can keep track of all the ids used.
+				this.randomIndexesUsed.push(randomIndex);
 			}
 		},
 
@@ -96,9 +96,9 @@ export default {
 			this.correctPokemon.image.url = pokemonImageUrl;
 		},
 
-		insertRandomPokemons() {
+		getFourRandomPokemons() {
 			for (let i = 0; 4 > i; i++) {
-				this.getRandomPokemonNames();
+				this.setRandomPokemons();
 			}
 		},
 
@@ -114,7 +114,7 @@ export default {
 		},
 
 		//Generates a random number between 0 and 3 which is used to determine which button to insert the correct pokemon name.
-		randomButtonNumber() {
+		randomButtonIndex() {
 			return Math.floor(Math.random() * 3);
 		},
 	},

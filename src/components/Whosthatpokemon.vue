@@ -1,7 +1,10 @@
 <template>
 	<div class="guess-pokemon">
 		<div class="guess-pokemon__image">
-			<img :src="correctPokemon.image.url" :alt="altText" />
+			<img
+				:src="correctPokemon.image.url"
+				:alt="correctPokemon.image.altText"
+			/>
 		</div>
 
 		<h1 class="pokemon-font">{{ pokemonOutput }}</h1>
@@ -21,7 +24,7 @@ export default {
 				name: '',
 			},
 			pokemonOutput: "who's that Pokemon?",
-			buttonGuesses: [],
+			gamePokemons: [],
 			correctButtonPressed: false,
 			randomIdsUsed: [], //Array used to keep track of what pokemons has been fetched
 			allPokemons: [],
@@ -55,29 +58,10 @@ export default {
 		//Gets the pokemon used as the correct answer, and sets the image and name of that pokemon.
 		getCorrectPokemon() {
 			const correctPokemonIndex = this.randomButtonNumber();
-			const correctPokemon = this.buttonGuesses[correctPokemonIndex];
-			console.log(correctPokemon);
+			const correctPokemon = this.gamePokemons[correctPokemonIndex];
+
 			this.getCorrectPokemonImage(correctPokemon.url);
 			this.setCorrectPokemonData(correctPokemon.name, correctPokemonIndex);
-		},
-
-		setCorrectPokemonData(correctPokemonName, correctPokemonIndex) {
-			this.correctPokemon.name = correctPokemonName;
-			this.correctPokemon.index = correctPokemonIndex;
-		},
-
-		//Gets a random pokemon from the pokeApi and pushes it to the buttonGuesses array.
-		getRandomPokemonNames() {
-			const randomIndex = this.randomIndex();
-
-			if (this.randomIdsUsed.includes(randomIndex)) {
-				this.getRandomPokemonName();
-			} else {
-				this.buttonGuesses.push(this.allPokemons[randomIndex]);
-
-				//Pushes the id used to the randomIdsUsed array, so we can keep track of all the ids used.
-				this.randomIdsUsed.push(randomIndex);
-			}
 		},
 
 		async getCorrectPokemonImage(correctPokemonUrl) {
@@ -86,9 +70,26 @@ export default {
 			const pokemonData = await response.json();
 
 			const pokemonImage = pokemonData.sprites.front_default;
-			console.log(pokemonImage);
-
 			this.setPokemonImage(pokemonImage);
+		},
+
+		setCorrectPokemonData(correctPokemonName, correctPokemonIndex) {
+			this.correctPokemon.name = correctPokemonName;
+			this.correctPokemon.index = correctPokemonIndex;
+		},
+
+		//Gets a random pokemon from the pokeApi and pushes it to the gamePokemons array.
+		getRandomPokemonNames() {
+			const randomIndex = this.randomIndex();
+
+			if (this.randomIdsUsed.includes(randomIndex)) {
+				this.getRandomPokemonName();
+			} else {
+				this.gamePokemons.push(this.allPokemons[randomIndex]);
+
+				//Pushes the id used to the randomIdsUsed array, so we can keep track of all the ids used.
+				this.randomIdsUsed.push(randomIndex);
+			}
 		},
 
 		setPokemonImage(pokemonImageUrl) {

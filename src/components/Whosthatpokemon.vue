@@ -16,13 +16,12 @@ export default {
 	data() {
 		return {
 			correctPokemon: {
+				name: '',
+				correctAnswerIndex: null,
 				image: {
 					url: '',
 					altText: 'Picture of a pokemon',
 				},
-				pokemonIndex: null,
-				correctAnswerIndex: null,
-				name: '',
 			},
 			pokemonOutput: "who's that Pokemon?",
 			gamePokemons: [],
@@ -43,6 +42,15 @@ export default {
 	},
 
 	methods: {
+		//Method used to start the app.
+		runApp() {
+			this.getFourRandomPokemons();
+
+			// This sets all the data we need for the correctPokemon.
+			this.setCorrectPokemonData();
+		},
+
+		//Fetches all the pokemons from the pokeApi and caches them.
 		async fetchPokemon() {
 			const url = 'https://pokeapi.co/api/v2/pokemon?limit=151';
 			const response = await fetch(url);
@@ -51,38 +59,47 @@ export default {
 			this.mutateAllPokemons();
 		},
 
-		//Method used to start the app.
-		runApp() {
-			this.getFourRandomPokemons();
-			this.setCorrectPokemonData();
-			console.log(this.gamePokemons);
-		},
-
-		//Gets the pokemon used as the correct answer, and sets the image and name of that pokemon.
-		setCorrectPokemonData() {
-			const correctPokemonIndex = this.randomButtonIndex();
-
-			this.correctPokemon.correctAnswerIndex = correctPokemonIndex;
-			this.correctPokemon.name = this.gamePokemons[correctPokemonIndex].name;
-		},
-
-		async getCorrectPokemonImage(imageIndex) {
-			const imageURL = `../assets/poke-sprites-kanto/${imageIndex}.png`;
-			this.correctPokemon.image.url = imageURL;
-		},
-
+		//Adds an index to each pokemon in allPokemons, this index is used to get images from assets/images/poke-sprites-kanto folder.
 		mutateAllPokemons() {
 			this.allPokemons.forEach((pokemon, index) => {
-				pokemon.index = index;
+				//Adding +1 to the index because the image urls start from 1 and not 0.
+				pokemon.index = index + 1;
 			});
 		},
 
-		//Gets a random pokemon from the pokeApi and pushes it to the gamePokemons array.
-		setRandomPokemons() {
+		//Sets all the data needed for correctPokemon.
+		setCorrectPokemonData() {
+			//Variables used to set data.
+			const correctPokemonIndex = this.randomButtonIndex();
+			// prettier-ignore
+			const correctPokemonImageIndex = this.gamePokemons[correctPokemonIndex].index;
+			const correctPokemonName = this.gamePokemons[correctPokemonIndex].name;
+
+			//Solution for a dynamic img src with vite taken from https://stackoverflow.com/questions/66419471/vue-3-vite-dynamic-img-src
+			const correctPokemonImage = new URL(
+				`./../assets/images/poke-sprites-kanto/${correctPokemonImageIndex}.png`,
+				import.meta.url
+			).href;
+
+			//Sets data on correctPokemon
+			this.correctPokemon.correctAnswerIndex = correctPokemonIndex;
+			this.correctPokemon.name = correctPokemonName;
+			this.correctPokemon.image.url = correctPokemonImage;
+		},
+
+		//Calls setGamePokemons() four times by using a for loop.
+		getFourRandomPokemons() {
+			for (let i = 0; 4 > i; i++) {
+				this.setGamePokemons();
+			}
+		},
+
+		//Gets a random pokemon from the allPokemons and pushes it to the gamePokemons array.
+		setGamePokemons() {
 			const randomIndex = this.randomIndex();
 
 			if (this.randomIndexesUsed.includes(randomIndex)) {
-				this.setRandomPokemons();
+				this.setGamePokemons();
 			} else {
 				// this.allPokemon[randomIndex].pokemonIndex = randomIndex + 1;
 				this.gamePokemons.push(this.allPokemons[randomIndex]);
@@ -92,30 +109,20 @@ export default {
 			}
 		},
 
-		setPokemonImage(pokemonImageUrl) {
-			this.correctPokemon.image.url = pokemonImageUrl;
-		},
-
-		getFourRandomPokemons() {
-			for (let i = 0; 4 > i; i++) {
-				this.setRandomPokemons();
-			}
-		},
-
 		//Generates a random number used for pokemonId, the number is used in the pokeapi http link to get a random pokemon.
 		randomIndex() {
 			let randomId = Math.floor(Math.random() * 150);
 			return randomId;
 		},
 
-		//Capitalizes the first character of a string. (Used to capitalize the names from the pokeapi, since they were are all lowercase by default)
-		capitalizeString(string) {
-			return string.charAt(0).toUpperCase() + string.slice(1);
-		},
-
 		//Generates a random number between 0 and 3 which is used to determine which button to insert the correct pokemon name.
 		randomButtonIndex() {
 			return Math.floor(Math.random() * 3);
+		},
+
+		//Capitalizes the first character of a string. (Used to capitalize the names from the pokeapi, since they were are all lowercase by default)
+		capitalizeString(string) {
+			return string.charAt(0).toUpperCase() + string.slice(1);
 		},
 	},
 };

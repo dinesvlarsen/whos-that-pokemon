@@ -2,6 +2,7 @@
 	<div class="guess-pokemon">
 		<div class="guess-pokemon__image">
 			<img
+				:class="{ 'show-image': correctButtonStatus }"
 				:src="correctPokemon.image.url"
 				:alt="correctPokemon.image.altText"
 			/>
@@ -10,12 +11,19 @@
 		<h1 class="pokemon-font">{{ pokemonOutput }}</h1>
 
 		<button
-			@click.once="onClickCheck(index)"
+			@click="buttonOnClick(buttonIndex)"
+			:class="
+				correctPokemon.correctAnswerIndex === buttonIndex
+					? 'guess-pokemon__button--correct'
+					: 'guess-pokemon__buttons--incorrect'
+			"
 			class="guess-pokemon__buttons"
-			v-for="(pokemon, index) in this.gamePokemons"
-			:key="pokemon.index"
+			v-for="(pokemon, buttonIndex) in this.gamePokemons"
+			ref="buttons"
+			:key="pokemon.buttonIndex"
 		>
 			<div>{{ pokemon.name }}</div>
+			<div>{{ inde }}</div>
 		</button>
 	</div>
 </template>
@@ -32,9 +40,9 @@ export default {
 					altText: 'Picture of a pokemon',
 				},
 			},
-			pokemonOutput: "who's that Pokemon?",
+			pokemonOutput: "Who's that Pokemon?",
 			gamePokemons: [],
-			correctButtonPressed: false,
+			correctButtonStatus: false,
 			randomIndexesUsed: [], //Array used to keep track of what pokemons has been fetched
 			allPokemons: [],
 		};
@@ -51,13 +59,62 @@ export default {
 	},
 
 	methods: {
+		//Click function
+		buttonOnClick(buttonIndex) {
+			//Guard clause to stop clicking once correct button has been found.
+			if (this.correctButtonStatus) return;
+
+			const buttonClicked = this.$refs.buttons[buttonIndex];
+			const correctIndex = this.correctPokemon.correctAnswerIndex;
+
+			if (buttonIndex === correctIndex) {
+				this.correctButtonClicked(buttonClicked);
+			} else {
+				buttonClicked.classList.add('guess-pokemon__buttons--incorrect');
+			}
+		},
+
+		correctButtonClicked(button) {
+			const pokemonName = this.correctPokemon.name;
+
+			this.correctButtonStatus = true;
+			this.pokemonOutput = `It's ${pokemonName}!`;
+			button.classList.add('guess-pokemon__button--correct');
+
+			setTimeout(() => {
+				this.runApp();
+			}, 2000);
+		},
+
 		//Method used to start the app.
 		runApp() {
+			if (this.gamePokemons.length > 0) this.resetApp();
 			this.getFourRandomPokemons();
 
 			// This sets all the data we need for the correctPokemon.
 			this.setCorrectPokemonData();
 		},
+
+		//Resets the data used in the app.
+		resetApp() {
+			this.gamePokemons = [];
+			this.correctButtonStatus = false;
+			this.randomIndexesUsed = [];
+			this.pokemonOutput = "Who's that Pokemon?";
+			this.$refs.buttons.forEach((button) => {
+				const correctClass = 'guess-pokemon__button--correct';
+				const incorrectClass = 'guess-pokemon__buttons--incorrect';
+				const buttonClasses = [...button.classList];
+				console.log(buttonClasses.includes(correctClass));
+				const buttonHasCorrect = buttonClasses.includes(correctClass);
+				const buttonHasIncorrect = buttonClasses.includes(incorrectClass);
+
+				if (buttonHasCorrect) button.classList.remove(correctClass);
+				if (buttonHasIncorrect) button.classList.remove(incorrectClass);
+			});
+		},
+
+		removeButtonClasses(button) {},
 
 		//Fetches all the pokemons from the pokeApi and caches them.
 		async fetchPokemon() {
@@ -168,7 +225,7 @@ export default {
 	filter: brightness(0%);
 }
 
-@keyframes example {
+@keyframes showImage {
 	from {
 		filter: brightness(10%);
 	}
@@ -176,10 +233,10 @@ export default {
 		filter: brightness(100%);
 	}
 }
-.show {
+.show-image {
 	filter: brightness(100%);
-	animation-name: example;
-	animation-duration: 2s;
+	animation-name: showImage;
+	animation: showImage 2s forwards;
 }
 
 .guess-pokemon__buttons {

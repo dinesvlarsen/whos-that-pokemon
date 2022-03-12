@@ -12,18 +12,17 @@
 
 		<button
 			@click="buttonOnClick(buttonIndex)"
-			:class="
-				correctPokemon.correctAnswerIndex === buttonIndex
-					? 'guess-pokemon__button--correct'
-					: 'guess-pokemon__buttons--incorrect'
-			"
 			class="guess-pokemon__buttons"
+			:class="{
+				'guess-pokemon__button--incorrect': gamePokemons[buttonIndex].clicked,
+				//prettier-ignore
+				'guess-pokemon__button--correct':gamePokemons[buttonIndex].correctClicked,
+			}"
 			v-for="(pokemon, buttonIndex) in this.gamePokemons"
 			ref="buttons"
 			:key="pokemon.buttonIndex"
 		>
 			<div>{{ pokemon.name }}</div>
-			<div>{{ inde }}</div>
 		</button>
 	</div>
 </template>
@@ -32,6 +31,7 @@
 export default {
 	data() {
 		return {
+			correctButtonStatus: false, 
 			correctPokemon: {
 				name: '',
 				correctAnswerIndex: null,
@@ -42,8 +42,7 @@ export default {
 			},
 			pokemonOutput: "Who's that Pokemon?",
 			gamePokemons: [],
-			correctButtonStatus: false,
-			randomIndexesUsed: [], //Array used to keep track of what pokemons has been fetched
+			randomIndexesUsed: [], //Keeps track of what pokemons has been pushed into gamePokemons.
 			allPokemons: [],
 		};
 	},
@@ -64,23 +63,19 @@ export default {
 			//Guard clause to stop clicking once correct button has been found.
 			if (this.correctButtonStatus) return;
 
-			const buttonClicked = this.$refs.buttons[buttonIndex];
-			const correctIndex = this.correctPokemon.correctAnswerIndex;
-
-			if (buttonIndex === correctIndex) {
-				this.correctButtonClicked(buttonClicked);
+			if (buttonIndex === this.correctPokemon.correctAnswerIndex) {
+				this.correctButtonClicked(buttonIndex);
 			} else {
-				buttonClicked.classList.add('guess-pokemon__buttons--incorrect');
+				this.gamePokemons[buttonIndex].clicked = true;
 			}
 		},
 
-		correctButtonClicked(button) {
-			const pokemonName = this.correctPokemon.name;
-
+		correctButtonClicked(buttonIndex) {
 			this.correctButtonStatus = true;
-			this.pokemonOutput = `It's ${pokemonName}!`;
-			button.classList.add('guess-pokemon__button--correct');
+			this.gamePokemons[buttonIndex].correctClicked = true;
+			this.pokemonOutput = `It's ${this.correctPokemon.name}!`;
 
+			//Reruns the app after 2 seconds to load new pokemons.
 			setTimeout(() => {
 				this.runApp();
 			}, 2000);
@@ -97,24 +92,15 @@ export default {
 
 		//Resets the data used in the app.
 		resetApp() {
+			this.gamePokemons.forEach((pokemon) => {
+				delete pokemon.clicked;
+				delete pokemon.correctClicked;
+			});
 			this.gamePokemons = [];
 			this.correctButtonStatus = false;
 			this.randomIndexesUsed = [];
 			this.pokemonOutput = "Who's that Pokemon?";
-			this.$refs.buttons.forEach((button) => {
-				const correctClass = 'guess-pokemon__button--correct';
-				const incorrectClass = 'guess-pokemon__buttons--incorrect';
-				const buttonClasses = [...button.classList];
-				console.log(buttonClasses.includes(correctClass));
-				const buttonHasCorrect = buttonClasses.includes(correctClass);
-				const buttonHasIncorrect = buttonClasses.includes(incorrectClass);
-
-				if (buttonHasCorrect) button.classList.remove(correctClass);
-				if (buttonHasIncorrect) button.classList.remove(incorrectClass);
-			});
 		},
-
-		removeButtonClasses(button) {},
 
 		//Fetches all the pokemons from the pokeApi and caches them.
 		async fetchPokemon() {
@@ -151,6 +137,14 @@ export default {
 			this.correctPokemon.correctAnswerIndex = correctPokemonIndex;
 			this.correctPokemon.name = correctPokemonName;
 			this.correctPokemon.image.url = correctPokemonImage;
+
+			//Sets seperate onclick boolean value on the object in gamePokemons that has the correct pokemon
+			this.gamePokemons.forEach((pokemon) => {
+				if (pokemon === this.gamePokemons[correctPokemonIndex]) {
+					delete pokemon.clicked;
+					pokemon.correctClicked = false;
+				}
+			});
 		},
 
 		//Calls setGamePokemons() four times by using a for loop.
@@ -163,11 +157,13 @@ export default {
 		//Gets a random pokemon from the allPokemons and pushes it to the gamePokemons array.
 		setGamePokemons() {
 			const randomIndex = this.randomIndex();
+			const randomIndexesUsed = this.randomIndexesUsed.includes(randomIndex);
 
-			if (this.randomIndexesUsed.includes(randomIndex)) {
+			if (randomIndexesUsed) {
 				this.setGamePokemons();
 			} else {
 				const pokemon = this.allPokemons[randomIndex];
+				pokemon.clicked = false;
 				pokemon.name = this.capitalizeString(pokemon.name);
 				// this.allPokemon[randomIndex].pokemonIndex = randomIndex + 1;
 				this.gamePokemons.push(pokemon);
@@ -257,7 +253,7 @@ export default {
 	background-color: rgb(0, 180, 0);
 }
 
-.guess-pokemon__buttons--incorrect {
+.guess-pokemon__button--incorrect {
 	background-color: rgb(207, 41, 41);
 	text-decoration: line-through;
 }

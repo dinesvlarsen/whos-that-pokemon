@@ -250,7 +250,7 @@ export default {
 <style>
 .guess-pokemon {
 	max-width: 1440px;
-	margin: 34px 24px 0 24px;
+	margin: var(--l) var(--m) 0 var(--m);
 }
 
 .guess-pokemon__image {
@@ -361,7 +361,7 @@ export default {
 	.guess-pokemon__buttons {
 		display: grid;
 		grid-template-columns: minmax(398px, auto) minmax(398px, auto);
-		grid-gap: 16px 64px;
+		grid-gap: var(--s) var(--xxl);
 		margin: 0 auto;
 		justify-content: center;
 	}

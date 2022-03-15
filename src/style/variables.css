@@ -1,7 +1,30 @@
 :root {
-	--background: #f03954;
-	--primary: #ffcb05;
-
-	--font-family: 'sans-serif';
+	/* TEXT STYLES */
 	--font-size: 20px;
+	--output-font-family: 'pokemon-font', 'sans-serif';
+	--output-font-size: 20px;
+	--button-font-family: 'Press Start 2P', 'sans-serif';
+	--button-font-size: 14px;
+
+	/* COLORS */
+	--primary: #ffcb05;
+	--secondary: #1b3022d5;
+	--background: #5bc0be;
+	--background-accent: #86d5d3;
+	--correct: #46d246;
+	--incorrect: #f36448;
+
+	/* SPACINGS */
+	--xxl: 64px;
+	--xl: 44px;
+	--l: 32px;
+	--m: 24px;
+	--s: 16px;
+}
+
+@media screen and (min-width: 744px) {
+	:root {
+		--output-font-size: 36px;
+		--button-font-size: 18px;
+	}
 }

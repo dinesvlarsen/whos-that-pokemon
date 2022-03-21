@@ -331,7 +331,7 @@ export default {
 	}
 
 	.guess-pokemon__image {
-		max-width: 303px;
+		max-width: 250px;
 		margin-top: var(--l);
 	}
 

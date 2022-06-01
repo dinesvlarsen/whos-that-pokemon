@@ -1,7 +1,6 @@
 <template>
 	<div class="guess-pokemon">
 		<div class="guess-pokemon__image">
-			<!-- <img src="./../assets/images/25.png" alt="" /> -->
 			<img
 				:class="{ 'show-image': correctButtonStatus }"
 				:src="correctPokemon.image.url"

@@ -1,5 +1,6 @@
 <template>
-	<div class="guess-pokemon">
+	<div class="loading" v-if="loading">loading...</div>
+	<div v-else class="guess-pokemon">
 		<div class="guess-pokemon__image">
 			<img
 				:class="{ 'show-image': correctButtonStatus }"
@@ -40,6 +41,7 @@
 export default {
 	data() {
 		return {
+			loading: true,
 			correctButtonStatus: false,
 			correctPokemon: {
 				name: '',
@@ -134,6 +136,7 @@ export default {
 
 				this.allPokemons = results;
 				this.mutateAllPokemons();
+				this.loading = false;
 			} catch (error) {
 				//Solution for a dynamic img src with vite taken from https://stackoverflow.com/questions/66419471/vue-3-vite-dynamic-img-src
 				this.correctPokemon.image.url = new URL(
@@ -247,6 +250,12 @@ export default {
 </script>
 
 <style>
+.loading {
+	display: grid;
+	place-items: center;
+	min-height: 100vh;
+}
+
 .guess-pokemon {
 	max-width: 1440px;
 	margin: var(--l) var(--m) 0 var(--m);
